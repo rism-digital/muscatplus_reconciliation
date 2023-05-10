@@ -18,7 +18,10 @@ async def get_service_document(req) -> response.HTTPResponse:
             }, {
                 "id": "Source",
                 "name": "Source authorities"
-        }],
+            }, {
+                "id": "Subject",
+                "name": "Subject authorities"
+            }],
         "documentation": "",
         "logo": "",
     }

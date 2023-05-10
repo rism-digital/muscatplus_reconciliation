@@ -17,9 +17,7 @@ async def handle_incoming_queries(req) -> response.HTTPResponse:
     if not res:
         return response.text("Bad response", status=500)
 
-    print(res)
-
-    return response.json(res)
+    return response.json(res, headers={"Access-Control-Allow-Origin": "*"})
 
 
 async def handle_get_query(req) -> Optional[dict]:
@@ -32,9 +30,15 @@ async def handle_get_query(req) -> Optional[dict]:
     return await _assemble_response(parsed_q)
 
 
-async def handle_post_query(req) -> dict:
-    qdocs = req.json
-    return await _assemble_response(qdocs)
+async def handle_post_query(req) -> Optional[dict]:
+    if "queries" not in req.form:
+        return None
+
+    qdocs: str = req.form.get("queries")
+    parsed_q: dict = orjson.loads(qdocs)
+
+    print(parsed_q)
+    return await _assemble_response(parsed_q)
 
 
 async def _assemble_response(qdocs: dict) -> dict:
@@ -47,16 +51,53 @@ async def _assemble_response(qdocs: dict) -> dict:
 
 async def _do_query(qdoc) -> list:
     qstr = qdoc.get("query", "")
-    type_filt = qdoc.get("type", [])
+    type_filt = qdoc.get("type")
+    limit = qdoc.get("limit")
+    properties = qdoc.get("properties", [])
 
     solr_q = qstr
-    fq = [f"type:{s.lower()}" for s in type_filt]
+    fq = []
+    if type_filt:
+        fq.append(f"type:{type_filt.lower()}")
+        if type_filt.lower() == "source":
+            # Only get the "book" records for sources
+            fq.append("is_collection_record_b:true")
+    else:
+        fq.append("type:person OR type:institution OR type:source OR type:subject")
+
+    if properties:
+        for prop in properties:
+            if prop['pid'] == "siglum":
+                fq.append(f"siglum_s:{prop['v']}")
+
+    fl = ["name_s",
+          "main_title_s",
+          "shelfmark_s",
+          "date_statement_s",
+          "term_s",
+          "type",
+          "id",
+          "score"
+          ]
+
+    sort = "score desc"
+
+    json_api_q = {
+        "query": solr_q,
+        "filter": fq,
+        "fields": fl,
+        "sort": sort,
+    }
+
+    if limit:
+        json_api_q["limit"] = limit
 
     s = Solr("http://localhost:8983/solr/muscatplus_live/")
-    resp = await s.search({"query": solr_q, "filter": fq}, cursor=True)
+    resp = await s.search(json_api_q, handler="/query")
 
-    print(resp.hits)
+    ret = await QueryResponse(resp, many=True).data
 
-    return await QueryResponse(resp,
-                               many=True).data
+    print(ret)
+
+    return ret
 
