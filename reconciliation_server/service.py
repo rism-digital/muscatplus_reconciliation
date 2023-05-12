@@ -22,7 +22,7 @@ async def get_service_document(req, cfg: dict) -> response.HTTPResponse:
                 "id": "Subject",
                 "name": "Subject authorities"
             }],
-        "documentation": "",
+        "documentation": f"RISM Online Reconciliation Service ({cfg['common']['version']})",
         "logo": "",
     }
     return response.json(service_document)
