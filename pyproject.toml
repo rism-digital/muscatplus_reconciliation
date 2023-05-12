@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "muscatplus_reconciliation"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 sanic = "^23.3.0"
 small-asc = {git = "https://github.com/rism-digital/small-asc.git", rev = "main"}
 ypres = {git = "https://github.com/rism-digital/ypres.git", rev = "main"}
