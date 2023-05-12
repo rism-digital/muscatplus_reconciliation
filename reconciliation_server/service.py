@@ -1,7 +1,7 @@
 from sanic import response
 
 
-async def get_service_document(req) -> response.HTTPResponse:
+async def get_service_document(req, cfg: dict) -> response.HTTPResponse:
     service_document: dict = {
         "versions": [
             "0.2"

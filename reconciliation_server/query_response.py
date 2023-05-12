@@ -6,10 +6,10 @@ ID_SUB = re.compile(r"(?:person|source|institution|subject)_(\d+)")
 
 
 class QueryResponse(ypres.AsyncDictSerializer):
-    qid = ypres.MethodField(label="id")
-    name = ypres.MethodField()
-    qtype = ypres.MethodField(label="type")
-    score = ypres.FloatField(attr="score")
+    qid: str = ypres.MethodField(label="id")
+    name: str = ypres.MethodField()
+    qtype: list = ypres.MethodField(label="type")
+    score: float = ypres.FloatField(attr="score")
 
     def get_qid(self, obj: dict) -> str:
         recid: str = obj["id"]

@@ -3,16 +3,16 @@ from typing import Optional
 
 import orjson
 from sanic import response
-from small_asc.client import Solr
 
 from reconciliation_server.query_response import QueryResponse
+from reconciliation_server.solr import SolrConnection
 
 
-async def handle_incoming_queries(req) -> response.HTTPResponse:
+async def handle_incoming_queries(req, cfg: dict) -> response.HTTPResponse:
     if req.method == "POST":
-        res = await handle_post_query(req)
+        res = await handle_post_query(req, cfg)
     else:
-        res = await handle_get_query(req)
+        res = await handle_get_query(req, cfg)
 
     if not res:
         return response.text("Bad response", status=500)
@@ -20,17 +20,17 @@ async def handle_incoming_queries(req) -> response.HTTPResponse:
     return response.json(res, headers={"Access-Control-Allow-Origin": "*"})
 
 
-async def handle_get_query(req) -> Optional[dict]:
+async def handle_get_query(req, cfg: dict) -> Optional[dict]:
     qdocs: Optional[str] = req.args.get("queries")
     if not qdocs:
         return None
 
     parsed_q: dict = orjson.loads(qdocs)
 
-    return await _assemble_response(parsed_q)
+    return await _assemble_response(parsed_q, cfg)
 
 
-async def handle_post_query(req) -> Optional[dict]:
+async def handle_post_query(req, cfg: dict) -> Optional[dict]:
     if "queries" not in req.form:
         return None
 
@@ -38,18 +38,18 @@ async def handle_post_query(req) -> Optional[dict]:
     parsed_q: dict = orjson.loads(qdocs)
 
     print(parsed_q)
-    return await _assemble_response(parsed_q)
+    return await _assemble_response(parsed_q, cfg)
 
 
-async def _assemble_response(qdocs: dict) -> dict:
+async def _assemble_response(qdocs: dict, cfg: dict) -> dict:
     resp = defaultdict(dict)
     for qnum, qdoc in qdocs.items():
-        resp[qnum]["result"] = await _do_query(qdoc)
+        resp[qnum]["result"] = await _do_query(qdoc, cfg)
 
     return dict(resp)
 
 
-async def _do_query(qdoc) -> list:
+async def _do_query(qdoc, cfg: dict) -> list:
     qstr = qdoc.get("query", "")
     type_filt = qdoc.get("type")
     limit = qdoc.get("limit")
@@ -77,8 +77,7 @@ async def _do_query(qdoc) -> list:
           "term_s",
           "type",
           "id",
-          "score"
-          ]
+          "score"]
 
     sort = "score desc"
 
@@ -92,8 +91,7 @@ async def _do_query(qdoc) -> list:
     if limit:
         json_api_q["limit"] = limit
 
-    s = Solr("http://localhost:8983/solr/muscatplus_live/")
-    resp = await s.search(json_api_q, handler="/query")
+    resp = await SolrConnection.search(json_api_q, handler="/query")
 
     ret = await QueryResponse(resp, many=True).data
 
