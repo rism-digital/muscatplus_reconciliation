@@ -1,4 +1,5 @@
 from sanic import response
+from reconciliation_server.identifiers import get_identifier
 
 
 async def get_service_document(req, cfg: dict) -> response.HTTPResponse:
@@ -23,6 +24,20 @@ async def get_service_document(req, cfg: dict) -> response.HTTPResponse:
                 "name": "Subject authorities"
             }],
         "documentation": f"RISM Online Reconciliation Service ({cfg['common']['version']})",
+        "suggest": {
+            "entity": {
+                "service_path": "/suggest/entity",
+                "service_url": get_identifier(req, "reconciliation.service")
+            }
+        },
+        "view": {
+            "url": "https://rism.online/{{id}}"
+        },
+        "preview": {
+            "height": 100,
+            "width": 400,
+            "url": f"{get_identifier(req, 'reconciliation.preview')}?id={{{{id}}}}"
+        },
         "logo": "",
     }
     return response.json(service_document)
