@@ -3,8 +3,10 @@ from typing import Optional
 
 import orjson
 from sanic import response
+from small_asc.client import Results
 
-from reconciliation_server.query_response import QueryResponse
+from reconciliation_server.identifiers import transform_query_id
+from reconciliation_server.query_response import QueryResponse, html_preview, SuggestResponse
 from reconciliation_server.solr import SolrConnection
 
 
@@ -37,7 +39,6 @@ async def handle_post_query(req, cfg: dict) -> Optional[dict]:
     qdocs: str = req.form.get("queries")
     parsed_q: dict = orjson.loads(qdocs)
 
-    print(parsed_q)
     return await _assemble_response(parsed_q, cfg)
 
 
@@ -85,17 +86,57 @@ async def _do_query(qdoc, cfg: dict) -> list:
         "query": solr_q,
         "filter": fq,
         "fields": fl,
-        "sort": sort,
+        "sort": sort
     }
 
     if limit:
         json_api_q["limit"] = limit
 
     resp = await SolrConnection.search(json_api_q, handler="/query")
+    return await QueryResponse(resp, many=True).data
 
-    ret = await QueryResponse(resp, many=True).data
 
-    print(ret)
+async def handle_preview_query(req, cfg) -> response.HTTPResponse:
+    doc_id: Optional[str] = req.args.get("id")
+    if not doc_id:
+        return response.text("ID argument was not supplied.", status=400)
 
-    return ret
+    # transform ID to Solr ID
+    solr_id: Optional[str] = transform_query_id(doc_id)
+    if not solr_id:
+        return response.text("Could not determine the ID from the incoming request", status=400)
 
+    resp: Optional[dict] = await SolrConnection.get(solr_id)
+    if not resp:
+        return response.text(f"Document with ID {doc_id} was not found", status=404)
+
+    formatted_resp: str = html_preview(resp)
+    return response.html(formatted_resp)
+
+
+async def handle_entity_suggest_query(req, cfg) -> response.HTTPResponse:
+    prefix = req.args.get("prefix")
+    if not prefix:
+        return response.text("Prefix argument was not supplied.", status=400)
+
+    fl = ["name_s",
+          "main_title_s",
+          "shelfmark_s",
+          "date_statement_s",
+          "record_type_s",
+          "term_s",
+          "type",
+          "id",
+          "score"]
+
+    filters = ["type:source OR type:person OR type:institution"]
+
+    resp: Optional[Results] = await SolrConnection.search({
+        "query": prefix,
+        "limit": 7,
+        "fields": fl,
+        "filter": filters
+    }, handler="/query")
+
+    results: list[dict] = await SuggestResponse(resp, many=True).data
+    return response.json({"result": results})
