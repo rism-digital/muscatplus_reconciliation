@@ -12,10 +12,11 @@ def _format_name(obj: dict) -> Optional[str]:
         name = f"{obj['name_s']}{date_statement}"
         return name
     elif obj_type == "institution":
-        return obj["name_s"]
+        return f"{obj['name_s']}"
     elif obj_type == "source":
-        smark: str = f" ({obj['shelfmark_s']})" if "shelfmark_s" in obj else ""
-        return f"{obj['main_title_s']}{smark}"
+        smark: str = f"{obj['shelfmark_s']}: " if "shelfmark_s" in obj else ""
+        sigl: str = f"{obj['siglum_s']} " if "siglum_s" in obj else ""
+        return f"{sigl}{smark}{obj['main_title_s']}"
     elif obj_type == "subject":
         return f"{obj['term_s']}"
     else:
@@ -23,7 +24,15 @@ def _format_name(obj: dict) -> Optional[str]:
 
 
 def _format_desc(obj: dict) -> Optional[str]:
-    return "A clever description goes here."
+    if obj['type'] == "source":
+        return f"{obj['type']}: {obj.get('record_type_s')}, {obj.get('source_type_s')}"
+    elif obj['type'] == "institution":
+        city = f", {obj['city_s']}" if 'city_s' in obj else ""
+        sigl: str = f" ({obj['siglum_s']})" if "siglum_s" in obj else ""
+        return f"{obj['type']}{city}{sigl}"
+    else:
+        return obj["type"]
+
 
 
 class QueryResponse(ypres.AsyncDictSerializer):
@@ -45,7 +54,7 @@ class QueryResponse(ypres.AsyncDictSerializer):
         return [obj["type"].title()]
 
     def get_description(self, obj: dict) -> str:
-        pass
+        return _format_desc(obj)
 
 
 HTML_TMPL = """
@@ -89,4 +98,4 @@ class SuggestResponse(ypres.AsyncDictSerializer):
         return _format_name(obj) or "[Unknown name]"
 
     def get_description(self, obj: dict) -> str:
-        return obj.get("record_type_s") or "Some description here"
+        return _format_desc(obj)

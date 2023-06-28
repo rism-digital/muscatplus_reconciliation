@@ -124,6 +124,9 @@ async def handle_entity_suggest_query(req, cfg) -> response.HTTPResponse:
           "shelfmark_s",
           "date_statement_s",
           "record_type_s",
+          "source_type_s",
+          "siglum_s",
+          "city_s",
           "term_s",
           "type",
           "id",
@@ -133,9 +136,15 @@ async def handle_entity_suggest_query(req, cfg) -> response.HTTPResponse:
 
     resp: Optional[Results] = await SolrConnection.search({
         "query": prefix,
-        "limit": 7,
+        "limit": 20,
         "fields": fl,
-        "filter": filters
+        "filter": filters,
+        "params": {
+            "bq": ["record_type_s:item^0",
+                   "record_type_s:collection^100",
+                   "type:person^50",
+                   "type:institution^50"]
+        }
     }, handler="/query")
 
     results: list[dict] = await SuggestResponse(resp, many=True).data
