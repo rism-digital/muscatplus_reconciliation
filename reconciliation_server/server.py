@@ -13,6 +13,17 @@ debug_mode: bool = config['common']['debug']
 version_string: str = config['common']['version']
 release: str = ""
 
+if debug_mode is False:
+    import sentry_sdk
+    from sentry_sdk.integrations.sanic import SanicIntegration
+    sentry_sdk.init(
+        dsn=config["sentry"]["dsn"],
+        integrations=[SanicIntegration()],
+        environment=config["sentry"]["environment"],
+        release=f"muscatplus_reconciliation@{release}"
+    )
+
+
 app = Sanic("mp_reconciliation", dumps=orjson.dumps)
 app.config.FORWARDED_SECRET = config['common']['secret']
 app.ctx.config = config
