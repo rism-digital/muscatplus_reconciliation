@@ -16,7 +16,8 @@ def _format_name(obj: dict) -> Optional[str]:
     elif obj_type == "source":
         smark: str = f"{obj['shelfmark_s']}: " if "shelfmark_s" in obj else ""
         sigl: str = f"{obj['siglum_s']} " if "siglum_s" in obj else ""
-        return f"{sigl}{smark}{obj['main_title_s']}"
+        title: str = f"{obj['main_title_s']}" if "main_title_s" in obj else ""
+        return f"{sigl}{smark}{title}"
     elif obj_type == "subject":
         return f"{obj['term_s']}"
     else:
@@ -32,7 +33,6 @@ def _format_desc(obj: dict) -> Optional[str]:
         return f"{obj['type']}{city}{sigl}"
     else:
         return obj["type"]
-
 
 
 class QueryResponse(ypres.AsyncDictSerializer):

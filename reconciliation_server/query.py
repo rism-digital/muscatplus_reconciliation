@@ -132,7 +132,7 @@ async def handle_entity_suggest_query(req, cfg) -> response.HTTPResponse:
           "id",
           "score"]
 
-    filters = ["type:source OR type:person OR type:institution"]
+    filters = ["type:source OR type:person OR type:institution", "!project_s:[* TO *]"]
 
     resp: Optional[Results] = await SolrConnection.search({
         "query": prefix,
