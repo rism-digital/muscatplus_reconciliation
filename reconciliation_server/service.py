@@ -19,9 +19,6 @@ async def get_service_document(req, cfg: dict) -> response.HTTPResponse:
             }, {
                 "id": "Source",
                 "name": "Source authorities"
-            }, {
-                "id": "Subject",
-                "name": "Subject authorities"
             }],
         "documentation": f"RISM Online Reconciliation Service ({cfg['common']['version']})",
         "suggest": {
