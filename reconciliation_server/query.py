@@ -19,7 +19,7 @@ async def handle_incoming_queries(req, cfg: dict) -> response.HTTPResponse:
     if not res:
         return response.text("Bad response", status=500)
 
-    return response.json(res, headers={"Access-Control-Allow-Origin": "*"})
+    return response.json(res)
 
 
 async def handle_get_query(req, cfg: dict) -> Optional[dict]:
