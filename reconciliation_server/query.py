@@ -57,7 +57,7 @@ async def _do_query(qdoc, cfg: dict) -> list:
     properties = qdoc.get("properties", [])
 
     solr_q = qstr
-    fq = []
+    fq = ["!project_s:[* TO *]"]
     if type_filt:
         fq.append(f"type:{type_filt.lower()}")
         if type_filt.lower() == "source":
