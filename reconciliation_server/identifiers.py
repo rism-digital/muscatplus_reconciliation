@@ -2,7 +2,7 @@ import re
 from typing import Optional
 
 ID_SUB: re.Pattern = re.compile(r"(?:person|source|institution|subject)_(\d+)")
-QUERY_ID_SUB: re.Pattern = re.compile(r"(?:people|sources|institutions)\/(?P<doc_id>\d+)")
+QUERY_ID_SUB: re.Pattern = re.compile(r"(?:people|sources|institutions)/(?P<doc_id>\d+)")
 
 
 def transform_solr_id(doc_id, doc_type) -> Optional[str]:
