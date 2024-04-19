@@ -57,7 +57,7 @@ async def _do_query(qdoc, cfg: dict) -> list:
     properties = qdoc.get("properties", [])
 
     solr_q = qstr
-    fq = ["!project_s:[* TO *]"]
+    fq = []
     if type_filt:
         fq.append(f"type:{type_filt.lower()}")
         if type_filt.lower() == "source":
@@ -66,10 +66,20 @@ async def _do_query(qdoc, cfg: dict) -> list:
     else:
         fq.append("type:person OR type:institution OR type:source OR type:subject")
 
+    only_diamm: bool = False
+
     if properties:
         for prop in properties:
             if prop['pid'] == "siglum":
                 fq.append(f"siglum_s:{prop['v']}")
+            elif prop['pid'] == "diamm":
+                only_diamm = True
+                # The value will be "true" but the presence of the property
+                # is enough to add it.
+                fq.append("project_s:diamm")
+
+    if not only_diamm:
+        fq.append("!project_s:[* TO *]")
 
     fl = ["name_s",
           "main_title_s",
