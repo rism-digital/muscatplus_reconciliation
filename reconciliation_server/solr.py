@@ -1,7 +1,7 @@
 import yaml
 from small_asc.client import Solr
 
-config: dict = yaml.safe_load(open('configuration.yml', 'r'))
+config: dict = yaml.safe_load(open('configuration.yml'))
 
 solr_url = config['solr']['server']
 

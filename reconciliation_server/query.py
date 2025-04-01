@@ -1,12 +1,15 @@
 from collections import defaultdict
-from typing import Optional
 
 import orjson
 from sanic import response
 from small_asc.client import Results
 
 from reconciliation_server.identifiers import transform_query_id
-from reconciliation_server.query_response import QueryResponse, html_preview, SuggestResponse
+from reconciliation_server.query_response import (
+    QueryResponse,
+    SuggestResponse,
+    html_preview,
+)
 from reconciliation_server.solr import SolrConnection
 
 
@@ -22,8 +25,8 @@ async def handle_incoming_queries(req, cfg: dict) -> response.HTTPResponse:
     return response.json(res)
 
 
-async def handle_get_query(req, cfg: dict) -> Optional[dict]:
-    qdocs: Optional[str] = req.args.get("queries")
+async def handle_get_query(req, cfg: dict) -> dict | None:
+    qdocs: str | None = req.args.get("queries")
     if not qdocs:
         return None
 
@@ -32,7 +35,7 @@ async def handle_get_query(req, cfg: dict) -> Optional[dict]:
     return await _assemble_response(parsed_q, cfg)
 
 
-async def handle_post_query(req, cfg: dict) -> Optional[dict]:
+async def handle_post_query(req, cfg: dict) -> dict | None:
     if "queries" not in req.form:
         return None
 
@@ -43,7 +46,7 @@ async def handle_post_query(req, cfg: dict) -> Optional[dict]:
 
 
 async def _assemble_response(qdocs: dict, cfg: dict) -> dict:
-    resp = defaultdict(dict)
+    resp: defaultdict = defaultdict(dict)
     for qnum, qdoc in qdocs.items():
         resp[qnum]["result"] = await _do_query(qdoc, cfg)
 
@@ -107,16 +110,16 @@ async def _do_query(qdoc, cfg: dict) -> list:
 
 
 async def handle_preview_query(req, cfg) -> response.HTTPResponse:
-    doc_id: Optional[str] = req.args.get("id")
+    doc_id: str | None = req.args.get("id")
     if not doc_id:
         return response.text("ID argument was not supplied.", status=400)
 
     # transform ID to Solr ID
-    solr_id: Optional[str] = transform_query_id(doc_id)
+    solr_id: str | None = transform_query_id(doc_id)
     if not solr_id:
         return response.text("Could not determine the ID from the incoming request", status=400)
 
-    resp: Optional[dict] = await SolrConnection.get(solr_id)
+    resp: dict | None = await SolrConnection.get(solr_id)
     if not resp:
         return response.text(f"Document with ID {doc_id} was not found", status=404)
 
@@ -144,7 +147,7 @@ async def handle_entity_suggest_query(req, cfg) -> response.HTTPResponse:
 
     filters = ["type:source OR type:person OR type:institution", "!project_s:[* TO *]"]
 
-    resp: Optional[Results] = await SolrConnection.search({
+    resp: Results | None = await SolrConnection.search({
         "query": prefix,
         "limit": 20,
         "fields": fl,

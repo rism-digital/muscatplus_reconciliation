@@ -1,11 +1,10 @@
 import re
-from typing import Optional
 
 ID_SUB: re.Pattern = re.compile(r"(?:person|source|institution|subject)_(\d+)")
 QUERY_ID_SUB: re.Pattern = re.compile(r"(?:people|sources|institutions)/(?P<doc_id>\d+)")
 
 
-def transform_solr_id(doc_id, doc_type) -> Optional[str]:
+def transform_solr_id(doc_id, doc_type) -> str | None:
     """
     Transforms a Solr ID into a reconciliation service ID
 
@@ -25,7 +24,7 @@ def transform_solr_id(doc_id, doc_type) -> Optional[str]:
         return None
 
 
-def transform_query_id(q_id: str) -> Optional[str]:
+def transform_query_id(q_id: str) -> str | None:
     """
     Transform an incoming Reconciliation service ID into a Solr ID.
     :param q_id: Query ID

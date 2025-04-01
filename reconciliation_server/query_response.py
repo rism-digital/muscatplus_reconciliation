@@ -1,11 +1,10 @@
-from typing import Optional
 
 import ypres
 
 from reconciliation_server.identifiers import transform_solr_id
 
 
-def _format_name(obj: dict) -> Optional[str]:
+def _format_name(obj: dict) -> str | None:
     obj_type = obj.get("type")
     if obj_type == "person":
         date_statement = f" ({obj['date_statement_s']})" if "date_statement_s" in obj else ""
@@ -24,7 +23,7 @@ def _format_name(obj: dict) -> Optional[str]:
         return None
 
 
-def _format_desc(obj: dict) -> Optional[str]:
+def _format_desc(obj: dict) -> str | None:
     if obj['type'] == "source":
         return f"{obj['type']}: {obj.get('record_type_s')}, {obj.get('source_type_s')}"
     elif obj['type'] == "institution":
@@ -53,7 +52,7 @@ class QueryResponse(ypres.AsyncDictSerializer):
     def get_qtype(self, obj: dict) -> list:
         return [obj["type"].title()]
 
-    def get_description(self, obj: dict) -> str:
+    def get_description(self, obj: dict) -> str | None:
         return _format_desc(obj)
 
 
@@ -97,5 +96,5 @@ class SuggestResponse(ypres.AsyncDictSerializer):
     def get_name(self, obj: dict) -> str:
         return _format_name(obj) or "[Unknown name]"
 
-    def get_description(self, obj: dict) -> str:
+    def get_description(self, obj: dict) -> str | None:
         return _format_desc(obj)

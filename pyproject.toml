@@ -1,25 +1,67 @@
-[tool.poetry]
+[project]
 name = "muscatplus-reconciliation"
 version = "0.1.0"
 description = ""
-authors = ["Andrew Hankinson <andrew.hankinson@rism.digital>"]
+authors = [{ name = "Andrew Hankinson", email = "andrew.hankinson@rism.digital" }]
+requires-python = ">=3.11,<4"
 readme = "README.md"
+dependencies = [
+    "sanic>=24.6.0,<26",
+    "small-asc",
+    "ypres",
+    "orjson>=3.10.7,<4",
+    "pyyaml>=6.0.1,<7",
+    "sentry-sdk>=2.14.0,<3",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-sanic = "^24.6.0"
-small-asc = {git = "https://github.com/rism-digital/small-asc.git", rev = "main"}
-ypres = {git = "https://github.com/rism-digital/ypres.git", rev = "main"}
-orjson = "^3.10.7"
-pyyaml = "^6.0.1"
-sentry-sdk = "^2.14.0"
+[dependency-groups]
+dev = [
+    "ipython>=9,<10",
+    "sanic-testing>=23.3.0,<24",
+    "pytest-asyncio>=0.21.0,<0.27",
+    "mypy>=1.15.0",
+]
 
+[tool.uv]
+package = false
 
-[tool.poetry.group.dev.dependencies]
-ipython = "^8.13.1"
-sanic-testing = "^23.3.0"
-pytest-asyncio = "^0.21.0"
+[tool.uv.sources]
+small-asc = { git = "https://github.com/rism-digital/small-asc.git", rev = "main" }
+ypres = { git = "https://github.com/rism-digital/ypres.git", rev = "main" }
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # pycodestyle warnings
+    "W",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    ## Flake8 plugins
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-comprehensions
+    "C",
+    # flake8-django
+    "DJ",
+    # flake8-bandit
+    "S",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+
+ignore = [
+    # Ignore Pycodestyle line-length warnings, (mainly long comments).
+    "E501",
+    # Ignore McCabe complexity (for now).
+    "C901",
+]

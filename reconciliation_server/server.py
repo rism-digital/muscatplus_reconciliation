@@ -2,13 +2,16 @@ import logging
 
 import orjson
 import yaml
-from sanic import Sanic, response, Blueprint
+from sanic import Blueprint, Sanic, response
 
-from reconciliation_server.query import handle_incoming_queries, handle_preview_query, handle_entity_suggest_query
+from reconciliation_server.query import (
+    handle_entity_suggest_query,
+    handle_incoming_queries,
+    handle_preview_query,
+)
 from reconciliation_server.service import get_service_document
 
-
-config: dict = yaml.safe_load(open('configuration.yml', 'r'))
+config: dict = yaml.safe_load(open('configuration.yml'))
 debug_mode: bool = config['common']['debug']
 version_string: str = config['common']['version']
 release: str = ""
@@ -28,10 +31,7 @@ app = Sanic("mp_reconciliation", dumps=orjson.dumps)
 app.config.FORWARDED_SECRET = config['common']['secret']
 app.ctx.config = config
 
-if debug_mode:
-    LOGLEVEL = logging.DEBUG
-else:
-    LOGLEVEL = logging.ERROR
+LOGLEVEL = logging.DEBUG if debug_mode else logging.ERROR
 
 logging.basicConfig(format="[%(asctime)s] [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)",
                     level=LOGLEVEL)
