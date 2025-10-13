@@ -1039,4 +1039,4 @@ wheels = [
 [[package]]
 name = "ypres"
 version = "1.1.2"
-source = { git = "https://github.com/rism-digital/ypres.git?rev=main#ef6bdf8d9accb1d05d612087a8a6227e40d2bc0f" }
+source = { git = "https://github.com/rism-digital/ypres.git?rev=main#3e26a1266b1f0056dbf49cb06a12947cec775d5c" }

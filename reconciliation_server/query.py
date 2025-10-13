@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import orjson
 from sanic import response
-from small_asc.client import Results
+from small_asc.client import JsonAPIRequest, Results
 
 from reconciliation_server.identifiers import transform_query_id
 from reconciliation_server.query_response import (
@@ -53,7 +53,7 @@ async def _assemble_response(qdocs: dict, cfg: dict) -> dict:
     return dict(resp)
 
 
-async def _do_query(qdoc, cfg: dict) -> list:
+async def _do_query(qdoc, cfg: dict) -> list | dict:
     qstr = qdoc.get("query", "")
     type_filt = qdoc.get("type")
     limit = qdoc.get("limit")
@@ -95,7 +95,7 @@ async def _do_query(qdoc, cfg: dict) -> list:
 
     sort = "score desc"
 
-    json_api_q = {
+    json_api_q: JsonAPIRequest = {
         "query": solr_q,
         "filter": fq,
         "fields": fl,
@@ -106,7 +106,8 @@ async def _do_query(qdoc, cfg: dict) -> list:
         json_api_q["limit"] = limit
 
     resp = await SolrConnection.search(json_api_q, handler="/query")
-    return await QueryResponse(resp, many=True).data
+
+    return await QueryResponse(resp, many=True).serialized_many
 
 
 async def handle_preview_query(req, cfg) -> response.HTTPResponse:
@@ -160,5 +161,6 @@ async def handle_entity_suggest_query(req, cfg) -> response.HTTPResponse:
         }
     }, handler="/query")
 
-    results: list[dict] = await SuggestResponse(resp, many=True).data
+    results: list | dict = await SuggestResponse(resp, many=True).serialized_many
+
     return response.json({"result": results})

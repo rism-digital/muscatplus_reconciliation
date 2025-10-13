@@ -1,4 +1,3 @@
-import pytest
 import json
 from urllib.parse import quote_plus
 
@@ -12,7 +11,7 @@ def test_basic_get_query():
 
     req, resp = app.test_client.get(f"/reconcile/?queries={encoded_q}")
 
-    assert resp.status == 200
+    assert resp.status == 200  # noqa: S101
 
 
 def test_basic_post_query():
@@ -20,5 +19,5 @@ def test_basic_post_query():
     q_str: str = json.dumps(q_doc)
     encoded_q = f"{q_str}"
 
-    req, resp = app.test_client.post(f"/reconcile/", json=encoded_q)
-    assert resp.status == 200
+    req, resp = app.test_client.post("/reconcile/", json=encoded_q)
+    assert resp.status == 200  # noqa: S101

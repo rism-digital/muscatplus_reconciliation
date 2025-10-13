@@ -25,6 +25,9 @@ dev = [
 [tool.uv]
 package = false
 
+[tool.ruff]
+target-version = "py313"
+
 [tool.uv.sources]
 small-asc = { git = "https://github.com/rism-digital/small-asc.git", rev = "main" }
 ypres = { git = "https://github.com/rism-digital/ypres.git", rev = "main" }

@@ -1,7 +1,10 @@
 import re
 
+import sanic
+
 ID_SUB: re.Pattern = re.compile(r"(?:person|source|institution|subject)_(\d+)")
 QUERY_ID_SUB: re.Pattern = re.compile(r"(?:people|sources|institutions)/(?P<doc_id>\d+)")
+
 
 
 def transform_solr_id(doc_id, doc_type) -> str | None:
@@ -30,7 +33,7 @@ def transform_query_id(q_id: str) -> str | None:
     :param q_id: Query ID
     :return: A Solr ID string, or None if not successful.
     """
-    doc_matcher: re.Match = re.match(QUERY_ID_SUB, q_id)
+    doc_matcher: re.Match | None = re.match(QUERY_ID_SUB, q_id)
     if not doc_matcher:
         return None
 
@@ -45,7 +48,7 @@ def transform_query_id(q_id: str) -> str | None:
         return None
 
 
-def get_identifier(request: "sanic.request.Request", viewname: str, **kwargs) -> str:
+def get_identifier(request: sanic.Request, viewname: str, **kwargs) -> str:
     """
     Takes a request object, parses it out, and returns a templated identifier suitable
     for use in an "id" field, including the incoming request information on host and scheme (http/https).

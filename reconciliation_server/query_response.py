@@ -35,11 +35,11 @@ def _format_desc(obj: dict) -> str | None:
 
 
 class QueryResponse(ypres.AsyncDictSerializer):
-    qid: str = ypres.MethodField(label="id")
-    name: str = ypres.MethodField()
-    qtype: list = ypres.MethodField(label="type")
-    description: str = ypres.MethodField()
-    score: float = ypres.FloatField(attr="score")
+    qid = ypres.MethodField(label="id")
+    name = ypres.MethodField()
+    qtype = ypres.MethodField(label="type")
+    description = ypres.MethodField()
+    score = ypres.FloatField(attr="score")
 
     def get_qid(self, obj: dict) -> str:
         recid: str = obj["id"]
@@ -84,9 +84,9 @@ def html_preview(obj) -> str:
 
 
 class SuggestResponse(ypres.AsyncDictSerializer):
-    qid: str = ypres.MethodField(label="id")
-    name: str = ypres.MethodField()
-    description: str = ypres.MethodField()
+    qid = ypres.MethodField(label="id")
+    name = ypres.MethodField()
+    description = ypres.MethodField()
 
     def get_qid(self, obj: dict) -> str:
         recid: str = obj["id"]
