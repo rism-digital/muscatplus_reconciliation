@@ -11,30 +11,35 @@ from reconciliation_server.query import (
 )
 from reconciliation_server.service import get_service_document
 
-config: dict = yaml.safe_load(open('configuration.yml'))
-debug_mode: bool = config['common']['debug']
-version_string: str = config['common']['version']
+with open("configuration.yml") as cfile:
+    config: dict = yaml.safe_load(cfile)
+
+debug_mode: bool = config["common"]["debug"]
+version_string: str = config["common"]["version"]
 release: str = ""
 
-if debug_mode is False:
+if not debug_mode:
     import sentry_sdk
     from sentry_sdk.integrations.sanic import SanicIntegration
+
     sentry_sdk.init(
         dsn=config["sentry"]["dsn"],
         integrations=[SanicIntegration()],
         environment=config["sentry"]["environment"],
-        release=f"muscatplus_reconciliation@{release}"
+        release=f"muscatplus_reconciliation@{release}",
     )
 
 
 app = Sanic("mp_reconciliation", dumps=orjson.dumps)
-app.config.FORWARDED_SECRET = config['common']['secret']
+app.config.FORWARDED_SECRET = config["common"]["secret"]
 app.ctx.config = config
 
 LOGLEVEL = logging.DEBUG if debug_mode else logging.ERROR
 
-logging.basicConfig(format="[%(asctime)s] [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)",
-                    level=LOGLEVEL)
+logging.basicConfig(
+    format="[%(asctime)s] [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)",
+    level=LOGLEVEL,
+)
 
 log = logging.getLogger("mp_reconciliation")
 

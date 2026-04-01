@@ -1,5 +1,3 @@
-import pytest
-
 from reconciliation_server.server import app
 
 
