@@ -5,4 +5,4 @@ with open("configuration.yml") as cfile:
     config: dict = yaml.safe_load(cfile)
 
 solr_url = config["solr"]["server"]
-SolrConnection: Solr = Solr(solr_url)
+SolrConnection: Solr = Solr(solr_url, expand_json_fields=True)
