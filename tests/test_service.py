@@ -2,7 +2,7 @@ from reconciliation_server.server import app
 
 
 def test_get_service_document():
-    req, resp = app.test_client.get("/reconcile")
+    req, resp = app.test_client.get("/reconciliation/")
     js_resp = resp.json
 
     assert resp.status == 200  # noqa: S101
